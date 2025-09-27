@@ -2,6 +2,7 @@ module FMCBabyNat where
 
 -- Do not alter this import!
 import Prelude ( Show(..) , Eq(..) , undefined, Num (negate) )
+import System.Win32 (xBUTTON1)
 
 -- Define evenerything that is undefined,
 -- without using standard Haskell functions.
@@ -90,7 +91,7 @@ infix 4 <
 (/) O _ = zero
 (/)  x  y = 
   case x < y of
-     S O-> zero
+     S O -> zero
      O -> S( (x-*y) / y) 
 
 infixl 7 /
@@ -101,7 +102,7 @@ infixl 7 /
 (%) x y = 
   case x < y of
     S O -> x
-    O -> (x-*y) % y
+    O -> (x -* y) % y
 
 infixl 7 %
 
@@ -110,17 +111,17 @@ infixl 7 %
 -- and then define `devides` as a synonym to it
 -- again, outputs: O means False, S O means True
 (|||) :: Nat -> Nat -> Nat
-O ||| n = isZero n
-n ||| m = isZero (m % n)
+(|||) O _ = O 
+(|||) x y = isZero (x % y)
 
 infix 4 |||
 
 -- x `absDiff` y = |x - y|
 -- (Careful here: this - is the actual minus operator we know from the integers!)
 absDiff :: Nat -> Nat -> Nat
-absDiff x y =
+absDiff x y = 
   case x < y of
-    S O  -> y -* x 
+    S O -> y -* x
     O -> x -* y
 
 (|-|) :: Nat -> Nat -> Nat
