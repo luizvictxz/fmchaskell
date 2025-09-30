@@ -153,7 +153,7 @@ infixr 8 <^>
 (</>) x y = 
     case x < y of
         True -> O
-        False -> S((x <-> y) / y)
+        False -> S((x <-> y) </> y)
 
 infixl 7 </>
 
@@ -163,7 +163,7 @@ infixl 7 </>
 (<%>) x y = 
     case x < y of
         True -> x
-        False -> (x <-> y) % y
+        False -> (x <-> y) <%> y
 
 infixl 7 <%>
 
