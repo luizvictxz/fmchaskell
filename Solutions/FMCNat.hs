@@ -155,7 +155,12 @@ exp = pow
 
 -- quotient
 (</>) :: Nat -> Nat -> Nat
-(</>) = undefined
+(</>) O _ = O
+(</>) _ O = undefined
+(</>) x y = 
+    case x < y of
+        True -> O
+        False -> S((x <-> y) / y)
 
 -- remainder
 (<%>) :: Nat -> Nat -> Nat
