@@ -15,10 +15,8 @@ import Prelude
     , (++)
     , undefined
     , error
-    , otherwise, String
+    , otherwise, String, fst, snd
     )
-import GHC.Natural (Natural)
-import Graphics.Win32 (FaceName, nOTSRCCOPY)
 
 -- Define evenerything that is undefined,
 -- without using standard Haskell functions.
@@ -33,23 +31,17 @@ data Nat where
 ----------------------------------------------------------------
 
 instance Show Nat where
-
-    -- zero  should be shown as O
-    -- three should be shown as SSSO
-    show :: Nat -> String
     show O = "O"
     show (S k) = "S" ++ show k
 
 instance Eq Nat where
 
-    (==):: Nat -> Nat -> Bool
     (==) O O = True
     (==) (S n) (S m) = n == m
     (==) _ _ = False
 
 instance Ord Nat where
 
-    (<=):: Nat -> Nat -> Bool
     (<=) O _ = True
     (<=) (S _) O = False
     (<=) (S n) (S m) = n <= m
@@ -143,29 +135,47 @@ infixl 7 <*>
 
 -- power / exponentiation
 pow :: Nat -> Nat -> Nat
-pow = undefined
+pow _ O = S O
+pow O _ = O
+pow n (S m) = n * (pow n m)
 
 exp :: Nat -> Nat -> Nat
-exp = undefined
+exp = pow
 
 (<^>) :: Nat -> Nat -> Nat
-(<^>) = undefined
+(<^>) = pow
 
--- quotient
-(</>) :: Nat -> Nat -> Nat
-(</>) = undefined
-
--- remainder
-(<%>) :: Nat -> Nat -> Nat
-(<%>) = undefined
+infixr 8 <^>
 
 -- euclidean division
 eucdiv :: (Nat, Nat) -> (Nat, Nat)
-eucdiv = undefined
+eucdiv (_, O) = undefined
+eucdiv (x, y)
+    | x < y = (O, x)
+    | otherwise = (q, r)
+    where 
+        q = S q'
+        r = r'
+        (q',r') = eucdiv (x <-> y, y)
+
+
+-- quotient
+(</>) :: Nat -> Nat -> Nat
+x </> y = (fst.eucdiv) (x, y)
+
+infixl 7 </>
+
+-- remainder
+(<%>) :: Nat -> Nat -> Nat
+x<%>y = (snd.eucdiv) (x, y)
+
+infixl 7 <%>
 
 -- divides
 (<|>) :: Nat -> Nat -> Bool
-(<|>) = undefined
+x <|> y 
+    | y<%>x == O = True
+    | otherwise = False
 
 divides = (<|>)
 
@@ -174,21 +184,33 @@ divides = (<|>)
 -- x `dist` y = |x - y|
 -- (Careful here: this - is the real minus operator!)
 dist :: Nat -> Nat -> Nat
-dist = undefined
+x `dist` y
+    | x < y = dist y x
+    | otherwise = x <-> y
 
 (|-|) = dist
 
+infixl 6 |-|
+
 factorial :: Nat -> Nat
-factorial = undefined
+factorial O = one
+factorial (S n) = (S n) <*> factorial n
 
 -- signum of a number (-1, 0, or 1)
 sg :: Nat -> Nat
-sg = undefined
+sg O = O
+sg (S _) = S O
+
+lo' :: Nat -> Nat -> Nat -> Nat
+lo' b a n 
+    | (b<^>n) <= a = lo' b a (S n)
+    | otherwise = pred n
 
 -- lo b a is the floor of the logarithm base b of a
 lo :: Nat -> Nat -> Nat
-lo = undefined
-
+lo b a 
+    | a < b = O
+    | otherwise = lo' b a O
 
 ----------------------------------------------------------------
 -- Num & Integral fun
@@ -198,10 +220,13 @@ lo = undefined
 -- Do NOT use the following functions in the definitions above!
 
 toNat :: Integral a => a -> Nat
-toNat = undefined
+toNat n
+    | n <= 0 = O
+    | otherwise = S(toNat(n-1))
 
 fromNat :: Integral a => Nat -> a
-fromNat = undefined
+fromNat O = 0
+fromNat (S n) = 1 + fromNat n
 
 
 -- Voilá: we can now easily make Nat an instance of Num.
@@ -212,8 +237,4 @@ instance Num Nat where
     (-) = (<->)
     abs n = n
     signum = sg
-    fromInteger x
-      | x < 0     = undefined
-      | x == 0    = undefined
-      | otherwise = undefined
-
+    fromInteger = toNat
