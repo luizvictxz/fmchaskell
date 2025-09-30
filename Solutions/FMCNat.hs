@@ -164,7 +164,11 @@ exp = pow
 
 -- remainder
 (<%>) :: Nat -> Nat -> Nat
-(<%>) = undefined
+(<%>) _ O = undefined
+(<%>) x y = 
+    case x < y of
+        True -> x
+        False -> (x <-> y) % y
 
 -- euclidean division
 eucdiv :: (Nat, Nat) -> (Nat, Nat)
