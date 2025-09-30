@@ -135,9 +135,9 @@ infixl 7 <*>
 
 -- power / exponentiation
 pow :: Nat -> Nat -> Nat
-pow _ O = S O
+pow _ O = O
 pow O _ = O
-pow n (S m) = n * (pow n m)
+pow n (S m) = n <*> (pow n m)
 
 exp :: Nat -> Nat -> Nat
 exp = pow
@@ -146,30 +146,31 @@ exp = pow
 (<^>) = pow
 
 infixr 8 <^>
-
--- euclidean division
-eucdiv :: (Nat, Nat) -> (Nat, Nat)
-eucdiv (_, O) = undefined
-eucdiv (x, y)
-    | x < y = (O, x)
-    | otherwise = (q, r)
-    where 
-        q = S q'
-        r = r'
-        (q',r') = eucdiv (x <-> y, y)
-
-
 -- quotient
 (</>) :: Nat -> Nat -> Nat
-x </> y = (fst.eucdiv) (x, y)
+(</>) O _ = O
+(</>) _ O = undefined
+(</>) x y = 
+    case x < y of
+        True -> O
+        False -> S((x <-> y) / y)
 
 infixl 7 </>
 
 -- remainder
 (<%>) :: Nat -> Nat -> Nat
-x<%>y = (snd.eucdiv) (x, y)
+(<%>) _ O = undefined
+(<%>) x y = 
+    case x < y of
+        True -> x
+        False -> (x <-> y) % y
 
 infixl 7 <%>
+
+
+eucdiv :: (Nat, Nat) -> (Nat, Nat)
+eucdiv (_, O) = undefined
+eucdiv (x, y) = (x</>y, x<%>y)
 
 -- divides
 (<|>) :: Nat -> Nat -> Bool
