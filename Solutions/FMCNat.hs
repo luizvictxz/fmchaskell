@@ -55,7 +55,7 @@ instance Ord Nat where
     min _ O = O
     min O _ = O
     min (S n) (S m) = S(min n m)
-
+    
     max:: Nat -> Nat -> Nat
     max n O = n
     max O n = n
@@ -137,7 +137,7 @@ infixl 7 <*>
 pow :: Nat -> Nat -> Nat
 pow _ O = O
 pow O _ = O
-pow n (S m) = n <*> (pow n m)
+pow n (S m) = n <*> pow n m
 
 exp :: Nat -> Nat -> Nat
 exp = pow
