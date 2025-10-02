@@ -84,11 +84,14 @@ product (x:xs) =
     then x
     else x * product xs
 
+
 reverse :: [a] -> [a]
-reverse = undefined
+reverse [] = []
+reverse (x:xs) = reverse xs ++ [x]
 
 (++) :: [a] -> [a] -> [a]
-(++) = undefined
+(++) [] xs = xs 
+(++) (x:xs) ys = x:(xs++ys)
 
 -- right-associative for performance!
 -- (what?!)
@@ -96,7 +99,8 @@ infixr 5 ++
 
 -- (snoc is cons written backwards)
 snoc :: a -> [a] -> [a]
-snoc = undefined
+snoc x [] = [x]
+snoc x xs = xs ++ [x]
 
 (<:) :: [a] -> a -> [a]
 (<:) = flip snoc
@@ -111,7 +115,12 @@ xs +++ (y:ys) = (xs +++ [y]) +++ ys
 -- (hmm?!)
 infixl 5 +++
 
--- minimum :: Ord a => [a] -> a
+minimum :: Ord a => [a] -> a
+minimum [] = undefined
+minimum [x] = x 
+minimum (x:xs) = min x (minimum xs)
+
+
 -- maximum :: Ord a => [a] -> a
 
 -- take
@@ -142,8 +151,14 @@ infixl 5 +++
 -- (!!)
 
 -- filter
--- map
+filter:: (a -> Bool) -> [a] -> [a]
+filter _ [] = []
+filter p (n:ns) =
+  if p n
+    then n : filter p ns
+    else filter p ns
 
+-- map
 -- cycle
 -- repeat
 -- replicate
@@ -173,7 +188,7 @@ infixl 5 +++
 
 -- checks if the letters of a phrase form a palindrome (see below for examples)
 palindrome :: String -> Bool
-palindrome = undefined
+palindrome x = undefined
 
 {-
 
@@ -186,4 +201,3 @@ Examples of palindromes:
 "Doc, note I dissent.  A fast never prevents a fatness.  I diet on cod."
 
 -}
-
