@@ -15,7 +15,6 @@ import Prelude
 import qualified Prelude   as P
 import qualified Data.List as L
 import qualified Data.Char as C
-import System.Win32 (xBUTTON1)
 
 {- import qualified ... as ... ?
 
@@ -247,35 +246,121 @@ map _ [] = []
 map f (x:xs) = f x : map f xs
 
 -- cycle
+cycle:: [a] -> [a]
+cycle [] = error "not support to empty list"
+cycle xs = xs ++ cycle xs
+
 -- repeat
+repeat:: a -> [a]
+repeat x = x : repeat x
+
 -- replicate
+replicate:: (Integral i, Eq i) => i -> a -> [a]
+replicate 0 _ = []
+replicate i a = a: replicate (i-1) a
+
 
 -- isPrefixOf
+isPrefixOf:: Eq a => [a] -> [a] -> Bool
+isPrefixOf [] _ = True
+isPrefixOf _ [] = False
+isPrefixOf (x:xs) (y:ys) = x == y && isPrefixOf xs ys
+
 -- isInfixOf
+isInfixOf:: Eq a => [a] -> [a] -> Bool
+isInfixOf [] _ = True
+isInfixOf _ [] = False
+isInfixOf (x:xs) (y:ys) = isPrefixOf xs (y:ys) || isInfixOf xs ys
+
 -- isSuffixOf
+isSuffixOf:: Eq a => [a] -> [a] -> Bool
+isSuffixOf xs ys = isPrefixOf (reverse xs) (reverse ys)
 
 -- zip
--- zipWith
+zip:: [a] -> [b] -> [(a,b)]
+zip [] _ = []
+zip _ [] = []
+zip (x:xs) (y:ys) = (x,y) : zip xs ys
+
+-- zipWith    
+zipWith:: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith f [] _ = []
+zipWith f _ [] = []
+zipWith f (x:xs) (y:ys) = f x y : zipWith f xs ys
 
 -- intercalate
+intercalate:: [a] -> [[a]] -> [a]
+intercalate _ [] = []
+intercalate _ [xs] = xs 
+intercalate xs (ys:yss) = ys ++ xs ++ intercalate xs yss 
+
 -- nub
+nub:: Eq a => [a] -> [a]
+nub [] = []
+nub (x : xs) = x : nub (filter (x /=) xs)
 
 -- splitAt
--- what is the problem with the following?:
--- splitAt n xs  =  (take n xs, drop n xs)
+splitAt :: (Integral i) => i -> [a] -> ([a], [a])
+splitAt i xs | i <= 0 || i > length xs = ([], xs)
+splitAt _ [] = ([], [])
+splitAt i (x : xs) =
+  let (leftPart, rightPart) = splitAt (i - 1) xs
+   in (x : leftPart, rightPart)
 
 -- break
+break :: (a -> Bool) -> [a] -> ([a], [a])
+break _ [] = ([], [])
+break p (x : xs)
+  | p x = ([], x : xs)
+  | otherwise =
+      let (ys, zs) = break p xs
+       in (x : ys, zs)
 
 -- lines
+lines :: String -> [String]
+lines "" = []
+lines s =
+  let (firstLine, rem) = break (== '\n') s
+   in case rem of
+        "" -> [firstLine]
+        (_ : afterBreak) -> firstLine : lines afterBreak
+
 -- words
+words :: String -> [String]
+words s =
+  case dropWhile C.isSpace s of
+    "" -> []
+    s' ->
+      let (word, rem) = break C.isSpace s'
+       in word : words rem
+
 -- unlines
+unlines :: [String] -> String
+unlines [] = ""
+unlines s = intercalate "\n" s ++ "\n"
+
 -- unwords
+unwords :: [String] -> String
+unwords = intercalate " "
 
 -- transpose
+transpose :: [[a]] -> [[a]]
+transpose [] = []
+transpose matrix =
+  let nonEmptyRows = filter (not . null) matrix
+   in if null nonEmptyRows
+        then []
+        else map head nonEmptyRows : transpose (map tail nonEmptyRows)
 
--- checks if the letters of a phrase form a palindrome (see below for examples)
+-- normalize
+normalize :: String -> String
+normalize s = filter C.isAlphaNum (map C.toLower s)
+
+-- palindrome
 palindrome :: String -> Bool
-palindrome x = undefined
+palindrome s =
+  let normS = normalize s
+   in normS == reverse normS
 
 {-
 
