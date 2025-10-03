@@ -214,7 +214,6 @@ concat:: [[a]] -> [a]
 concat [] = []
 concat (x:xs) = x ++ concat xs
 
--- elem using the funciton 'any' above
 elem:: Eq a => a -> [a] -> Bool
 elem x = any (== x)
 
