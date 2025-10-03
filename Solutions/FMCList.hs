@@ -1,4 +1,6 @@
 {-# LANGUAGE GADTs #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use foldr" #-}
 
 module FMCList where
 
@@ -13,6 +15,7 @@ import Prelude
 import qualified Prelude   as P
 import qualified Data.List as L
 import qualified Data.Char as C
+import System.Win32 (xBUTTON1)
 
 {- import qualified ... as ... ?
 
@@ -122,33 +125,114 @@ minimum (x:xs) = min x (minimum xs)
 
 
 -- maximum :: Ord a => [a] -> a
+maximum:: Ord a => [a] -> a
+maximum [] = undefined
+maximum [x] = x
+maximum (x:xs) = max x (maximum xs)
 
 -- take
+take:: Integral a => a -> [a] -> [a]
+take x _ | x <= 0 = []
+take x ys | x > length ys = error "Number's big"
+take _ [] = []
+take x (y:ys) = y: take (x-1) ys
+
 -- drop
+drop:: Integral a => a -> [a] -> [a]
+drop x xs | x <= 0 = xs
+drop x xs | x > length xs = error "Number's big"
+drop _ [] = []
+drop x (_:ys) = drop (x-1) ys
 
 -- takeWhile
--- dropWhile
+takeWhile:: (a -> Bool) -> [a] -> [a]
+takeWhile _ [] = []
+takeWhile f (x:xs) = 
+  if f x
+    then x:takeWhile f xs
+    else takeWhile f xs 
 
+-- dropWhile
+dropWhile:: (a -> Bool) -> [a] -> [a]
+dropWhile _ [] = []
+dropWhile f (x:xs) =
+  if f x
+    then dropWhile f xs
+    else x:dropWhile f xs
+
+    
 -- tails
+tails:: [a] -> [[a]]
+tails [] = [[]]
+tails (x:xs) =  (x:xs) : tails xs
+
 -- init
+init:: [a] -> [a]
+init [] = error "no support to empty list"
+init [_] = []
+init (x:xs) = x : init xs 
+
 -- inits
+inits:: [a] -> [[a]]
+inits [] = [[]]
+inits xs = xs : inits (init xs)
 
 -- subsequences
+subsequences :: [a] -> [[a]]
+subsequences [] = [[]]
+subsequences (x:xs) = 
+  let rest = subsequences xs
+  in rest ++ map (x:) rest
 
 -- any
+any:: (a -> Bool) -> [a] -> Bool
+any _ [] = False
+any f (x:xs)
+  | f x = True
+  | otherwise = any f xs
+
 -- all
+all:: (a -> Bool) -> [a] -> Bool
+all _ [] = True
+all f (x:xs)
+  | f x = all f xs
+  | otherwise = False
+
 
 -- and
+and:: [Bool] -> Bool
+and [] = True
+and (x:xs) = x && and xs
+
 -- or
+or:: [Bool] -> Bool
+or [] = True
+or (x:xs) = x || or xs
 
 -- concat
+concat:: [[a]] -> [a]
+concat [] = []
+concat (x:xs) = x ++ concat xs
 
 -- elem using the funciton 'any' above
+elem:: Eq a => a -> [a] -> Bool
+elem x = any (== x)
 
 -- elem': same as elem but elementary definition
 -- (without using other functions except (==))
+elem':: Eq a => a -> [a] -> Bool
+elem' _ [] = False
+elem' x (y:ys)
+  | x == y = True
+  | otherwise = elem' x ys
 
 -- (!!)
+(!!):: Integral i => [a] -> i -> a
+xs !! i 
+  | i < 0 || i > length xs = error "out range"
+[] !! _ = error "not support to empty list"
+(x:_) !! 0 = x
+(_:xs) !! a = xs !! (a-1)
 
 -- filter
 filter:: (a -> Bool) -> [a] -> [a]
@@ -159,6 +243,10 @@ filter p (n:ns) =
     else filter p ns
 
 -- map
+map:: (a -> b) -> [a] -> [b]
+map _ [] = []
+map f (x:xs) = f x : map f xs
+
 -- cycle
 -- repeat
 -- replicate
